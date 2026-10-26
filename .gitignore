@@ -1,0 +1,22 @@
+/target/
+*.class
+.mtj.tmp/
+*.jar
+*.war
+*.ear
+*.hsperfdata_*
+
+# VS Code and IDE settings
+.settings/
+.classpath
+.project
+.projectBuildingException
+.factorypath
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Operating System Files
+Thumbs.db
+ehcmd.log

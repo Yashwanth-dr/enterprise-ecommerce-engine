@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  discovery-server:
+    image: maven:3.8.8-eclipse-temurin-17
+    volumes:
+      - ./discovery-server:/app
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8761:8761"
+    networks:
+      - enterprise-network
+
+  api-gateway:
+    image: maven:3.8.8-eclipse-temurin-17
+    volumes:
+      - ./api-gateway:/app
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      - discovery-server
+    networks:
+      - enterprise-network
+
+  enterprise-mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: enterprise_product_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - enterprise-network
+
+  product-service:
+    image: maven:3.8.8-eclipse-temurin-17
+    volumes:
+      - ./product-service:/app
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://enterprise-mysql:3306/enterprise_product_db?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      - discovery-server
+      - enterprise-mysql
+    networks:
+      - enterprise-network
+
+networks:
+  enterprise-network:
+    driver: bridge

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise E-Commerce Engine Catalog</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 40px;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+        .filter-section {
+            margin-bottom: 25px;
+        }
+        select, button {
+            padding: 10px 18px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            outline: none;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 5px solid #2ecc71;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .sku {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 15px 0 0 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Enterprise Product Catalog System</h1>
+    
+    <div class="filter-section">
+        <select id="categorySelect">
+            <option value="electronics">Electronics</option>
+            <option value="audio">Audio Workstations</option>
+        </select>
+        <button onclick="fetchCatalogData()">Fetch Live Catalog</button>
+    </div>
+
+    <div id="productGrid" class="grid">
+        <!-- Live items dynamically rendered by JavaScript mapping loops -->
+    </div>
+</div>
+
+<script>
+    async function fetchCatalogData() {
+        const category = document.getElementById('categorySelect').value;
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '<p>Querying dynamic microservice mesh route...</p>';
+
+        try {
+            // Asynchronous client layer targets API Gateway directly on port 8080
+            const response = await fetch(`http://localhost:8080/api/v1/products?category=${category}`);
+            if (!response.ok) throw new Error('Network bridge response validation failed');
+            
+            const products = await response.json();
+            grid.innerHTML = '';
+
+            if (products.length === 0) {
+                grid.innerHTML = '<p>No indexed database records found for this category criteria.</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="sku">SKU: ${product.sku}</div>
+                    <h3>${product.name}</h3>
+                    <p>Available Stock: <strong>${product.stockQuantity} units</strong></p>
+                    <div class="price">₹${product.price.toLocaleString('en-IN')}</div>
+                `;
+                grid.appendChild(card);
+            });
+        } catch (error) {
+            grid.innerHTML = `<p style="color:red;">Error connecting to Gateway Core Router: ${error.message}</p>`;
+        }
+    }
+</script>
+</body>
+</html>
